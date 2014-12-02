@@ -259,5 +259,30 @@ module BitBucket
     alias :repo_tags :tags
     alias :repository_tags :tags
 
+    # Revoke group access
+    #
+    # = Examples
+    #   bitbucket.repos.revoke_group 'myteam', 'repo-name', 'otherteam', 'group-name'
+    #   bitbucket.repos.revoke_group 'myteam', 'repo-name', 'myteam', 'group-name'
+    def revoke_group(user_name, repo_name, group_owner, group_slug, params = {})
+      _update_user_repo_params(user_name, repo_name)
+      _validate_user_repo_params(user, repo) unless user? && repo?
+      normalize! params
+      
+      response = delete_request("/group-privileges/#{user}/#{repo.downcase}/#{group_owner}/#{group_slug}")
+    end
+
+    # Grant group access
+    #
+    # = Examples
+    #   bitbucket.repos.grant_group 'myteam', 'repo-name', 'otherteam', 'group-name', 'admin'
+    def grant_group(user_name, repo_name, group_owner, group_slug, privilege, params = {})
+      _update_user_repo_params(user_name, repo_name)
+      _validate_user_repo_params(user, repo) unless user? && repo?
+      normalize! params
+      params['data'] = privilege
+      response = put_request("/group-privileges/#{user}/#{repo.downcase}/#{group_owner}/#{group_slug}", params)
+    end
+
   end # Repos
 end # BitBucket
